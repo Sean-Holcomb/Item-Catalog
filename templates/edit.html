@@ -1,0 +1,21 @@
+<html>
+	<header>
+		<h1>Catalog App</h1>
+		<button>Login</button>
+	</header>
+	<body>
+		<h1> Edit Item </h1>
+		<form action="{{url_for('editItem', item_id = item.id)}}" method = 'POST'>
+			<p>Title</p>
+			<input type='text' size='30' name='name' placeholder = '{{item.name}}'>
+			<p>Description</p>
+			<input type='text' size='30' name='description' placeholder = '{{item.description}}'>
+			<select>
+				{% for i in catagories %}
+					<option id="{{i.id}}">{{i.name}}</option>
+				{% endfor %}
+			</select>
+			<input type='submit' value='Submit'>
+		</form>
+	</body>
+</html>

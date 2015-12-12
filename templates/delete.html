@@ -1,0 +1,13 @@
+<html>
+	<header>
+		<h1>Catalog App</h1>
+		<button>Login</button>
+	</header>
+	<body>
+		<h1>Delete</h1>
+		<p> Are you sure you want to delete {{item.name}}</p>
+		<form action="{{url_for('deleteMenuItem', item_id = item.id )}}" method = 'POST'>
+			<input type='submit' value='Delete'>
+		</form>
+	</body>
+</html>
