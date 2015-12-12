@@ -10,7 +10,7 @@
 			<input type='text' size='30' name='name' placeholder = "Item's name">
 			<p>Description</p>
 			<input type='text' size='30' name='description' placeholder = 'A short description'>
-			<select>
+			<select name='catagory'>
 				{% for i in catagories %}
 					<option id="{{i.id}}">{{i.name}}</option>
 				{% endfor %}
