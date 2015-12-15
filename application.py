@@ -117,7 +117,7 @@ def gconnect():
     print "done!"
     return output
 
- @app.route('/gdisconnect')
+@app.route('/gdisconnect')
 def gdisconnect():
     access_token = login_session['access_token']
     print 'In gdisconnect access token is %s', access_token
@@ -204,6 +204,22 @@ def deleteItem(catagory_id, item_id):
 		return redirect(url_for('getItems', catagory_id = item.catagory_id))
 	else:
 		return render_template('delete.html', item = item)
+
+@app.route('/catalog.json')
+def catalogJSON():
+	json = { "Catagory" : [] }
+	catagories = session.query(Catagory).all()
+	for catagory in catagories:
+		catdict = catagory.serialize
+		items = session.query(Item).filter_by(catagory_id = catagory.id).all()
+		if items:
+			catdict['Item'] = []
+			for item in items:
+				catdict['Item'].append(item.serialize)
+		json['Catagory'].append(catdict)
+
+
+   	return jsonify(json)
 
 
 
