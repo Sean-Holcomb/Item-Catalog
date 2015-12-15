@@ -21,10 +21,10 @@ class Item(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String(80), nullable=False)
     description = Column(String, nullable = False)
-    cat_id = Column(Integer, ForeignKey('catagory.id'))
+    catagory_id = Column(Integer, ForeignKey('catagory.id'))
     catagory = relationship(Catagory)
 
-engine = create_engine('sqlite:///itemcatalog.db')
+engine = create_engine('sqlite:///itemcatalogs.db')
 
 
 Base.metadata.create_all(engine)

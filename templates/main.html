@@ -7,13 +7,13 @@
 		<div>
 			<h1>Catagories</h1>
 			{% for i in catagories %}
-				<a href={{url_for('getItems', catagory_id = i.id)}}>{{i.name}} </a>
+				<a href={{url_for('getItems', catagory_id = i.id)}}>{{i.name}} </a></br>
 			{% endfor %}
 		</div>
 		<div>
 			{% for j in items %}
-				<a href={{url_for('getItem', catagory_id = j.cat_id, item_id = j.id)}}>{{j.name}}</a>
-				<p>({{j.catagory}})</p>
+				<a href={{url_for('getItem', catagory_id = j.catagory_id, item_id = j.id)}}>{{j.title}}</a></br>
+				<p>({{j.catagory.name}})</p>
 			{% endfor %}
 		</div>
 	</body>
