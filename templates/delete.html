@@ -1,13 +1,23 @@
 <html>
+	<head>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+		<link href={{ url_for('static', filename='styles.css') }} rel="stylesheet">
+	</head>
 	<header>
-		<h1>Catalog App</h1>
-		<button>Login</button>
+		<div class="row titlebar">
+			<h1>Catalog App</h1>
+			<form class="orange" action="{{url_for('gdisconnect')}}">
+				<input type='submit' value='Log Out'>
+			</form>
+		</div>
 	</header>
 	<body>
-		<h1>Delete</h1>
-		<p> Are you sure you want to delete {{item.title}}</p>
-		<form action="{{url_for('deleteItem', catagory_id = item.catagory_id, item_id = item.id )}}" method = 'POST'>
-			<input type='submit' value='Delete'>
-		</form>
+		<div class="content">
+			<h2>Delete</h2>
+			<p> Are you sure you want to delete {{item.title}}</p>
+			<form action="{{url_for('deleteItem', catagory_id = item.catagory_id, item_id = item.id )}}" method = 'POST'>
+				<input type='submit' value='Delete'>
+			</form>
+		</div>
 	</body>
 </html>

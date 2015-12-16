@@ -1,21 +1,32 @@
 <html>
+	<head>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+		<link href={{ url_for('static', filename='styles.css') }} rel="stylesheet">
+	</head>
 	<header>
-		<h1>Catalog App</h1>
-		<button>Login</button>
+		<div class="row titlebar">
+			<h1>Catalog App</h1>
+			<form class="orange" action="{{url_for('gdisconnect')}}">
+				<input type='submit' value='Log Out'>
+			</form>
+		</div>
 	</header>
 	<body>
-		<h1> Edit Item </h1>
-		<form action="{{url_for('editItem', catagory_id = item.catagory_id, item_id = item.id)}}" method = 'POST'>
-			<p>Title</p>
-			<input type='text' size='30' name='name' placeholder = '{{item.title}}'>
-			<p>Description</p>
-			<input type='text' size='30' name='description' placeholder = '{{item.description}}'>
-			<select name='catagory'>
-				{% for i in catagories %}
-					<option>{{i.name}}</option>
-				{% endfor %}
-			</select>
-			<input type='submit' value='Submit'>
-		</form>
+		<div class="content">
+			<h2> Edit Item </h2>
+			<form action="{{url_for('editItem', catagory_id = item.catagory_id, item_id = item.id)}}" method = 'POST'>
+				<p>Title</p>
+				<input type='text' size='30' name='name' placeholder = '{{item.title}}'></br></br>
+				<p>Description</p>
+				<input type='text' size='30' name='description' placeholder = '{{item.description}}'></br></br>
+				<p>Catagory</p>
+				<select name='catagory'>
+					{% for i in catagories %}
+						<option>{{i.name}}</option>
+					{% endfor %}
+				</select></br></br>
+				<input type='submit' value='Submit'>
+			</form>
+		</div>
 	</body>
 </html>

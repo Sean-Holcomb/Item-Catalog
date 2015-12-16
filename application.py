@@ -22,10 +22,9 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 @app.route("/")
-@app.route("/catalog")
+@app.route("/catalog/")
 def catalog():
 	catagories = session.query(Catagory).all()
-	#propbally has problems with ordering
 	items = session.query(Item).order_by(desc(Item.id)).limit(10).all()
 	return render_template('main.html', catagories=catagories, items=items)
 
@@ -150,8 +149,7 @@ def gdisconnect():
 
 @app.route("/catalog/add", methods = ['GET', 'POST'])
 def addItem():
-	if request.method == 'POST':
-		print request.form['catagory']
+	if request.method == 'POST' and request.form['name'] and request.form['description'] and request.form['catagory']:
 		catagory = session.query(Catagory).filter_by(name = request.form['catagory']).one()
 		newItem = Item(title = request.form['name'], description = request.form['description'], catagory = catagory)
 		session.add(newItem)
@@ -175,13 +173,11 @@ def getItem(catagory_id, item_id):
 @app.route("/catalog/<int:catagory_id>/<int:item_id>/edit", methods = ['GET', 'POST'])
 def editItem(catagory_id, item_id):
 	editItem = session.query(Item).filter_by(id = item_id).one()
-	#probably has problem with drop down selector
 	if request.method == 'POST':
 		if request.form['name']:
 			editItem.title = request.form['name']
 		if request.form['description']:
 			editItem.description = request.form['description']
-
 		if request.form['catagory']:
 		  catagory = session.query(Catagory).filter_by(name = request.form['catagory']).one()
 		  editItem.catagory = catagory

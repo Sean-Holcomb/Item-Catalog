@@ -1,13 +1,25 @@
 <html>
+	<head>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+		<link href={{ url_for('static', filename='styles.css') }} rel="stylesheet">
+	</head>
 	<header>
-		<h1>Catalog App</h1>
-		<button>Login</button>
+		<div class="row titlebar">
+			<h1>Catalog App</h1>
+			<form class="orange" action="{{url_for('gdisconnect')}}">
+				<input type='submit' value='Log Out'>
+			</form>
+		</div>
 	</header>
 	<body>
-		<h2>{{item.title}}</h2>
-		<p>{{item.description}}</p>
-		<a href={{url_for('editItem', catagory_id = item.catagory_id, item_id = item.id) }}>Edit</a>
-		<p>|</p>
-		<a href = {{url_for('deleteItem', catagory_id = item.catagory_id ,item_id = item.id ) }}>Delete</a>
+		<div class="content">
+			<h2>{{item.title}}</h2>
+			<p>{{item.description}}</p>
+			<p>
+				<a href={{url_for('editItem', catagory_id = item.catagory_id, item_id = item.id) }}>Edit</a>
+				|
+				<a href = {{url_for('deleteItem', catagory_id = item.catagory_id ,item_id = item.id ) }}>Delete</a>
+			</p>
+		</div>
 	</body>
 </html>

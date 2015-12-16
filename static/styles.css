@@ -1,0 +1,40 @@
+header {
+	background-color: #0000ff;
+	margin-bottom: 2em;
+}
+
+body {
+	background-color: #cccccc;
+}
+
+a {
+	color: #ffaa00;
+}
+
+h1 {
+	color: #ffffff;
+}
+
+h2 {
+	margin-top: 0;
+	color: #0000ff;
+}
+
+.titlebar {
+	max-width: 800px;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+.content{
+	background-color: #ffffff;
+	padding: 2em;
+	max-width: 800px;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+.orange {
+	float: right;
+	background-color: #ffaa00;
+}
