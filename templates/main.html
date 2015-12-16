@@ -11,6 +11,7 @@
 			{% endfor %}
 		</div>
 		<div>
+			<a href={{url_for('addItem')}}>Add New Item</a>
 			{% for j in items %}
 				<a href={{url_for('getItem', catagory_id = j.catagory_id, item_id = j.id)}}>{{j.title}}</a></br>
 				<p>({{j.catagory.name}})</p>
