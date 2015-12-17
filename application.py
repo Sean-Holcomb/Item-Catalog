@@ -162,15 +162,17 @@ def addItem():
     Post request adds new item to the database
     User redirected to home if not logged in.
     """
-	if request.method == 'POST' and request.form['name'] and request.form['description'] and request.form['catagory']:
-		catagory = session.query(Catagory).filter_by(name = request.form['catagory']).one()
-		newItem = Item(title = request.form['name'], description = request.form['description'], catagory = catagory)
-		session.add(newItem)
-		session.commit()
-		return redirect(url_for('getItems', catagory_id = catagory.id))
-	else:
-		catagories = session.query(Catagory).all()
-		return render_template('new.html', catagories=catagories)
+    if 'username' not in login_session:
+        return catalog()
+    if request.method == 'POST' and request.form['name'] and request.form['description'] and request.form['catagory']:
+        catagory = session.query(Catagory).filter_by(name = request.form['catagory']).one()
+        newItem = Item(title = request.form['name'], description = request.form['description'], catagory = catagory)
+        session.add(newItem)
+        session.commit()
+        return redirect(url_for('getItems', catagory_id = catagory.id))
+    else:
+        catagories = session.query(Catagory).all()
+        return render_template('new.html', catagories=catagories)
 
 @app.route("/catalog/<int:catagory_id>")
 def getItems(catagory_id):
@@ -208,21 +210,23 @@ def editItem(catagory_id, item_id):
     Display page to edit an item in the database.
     redirrected to home page if user is not logged in.
     """
-	editItem = session.query(Item).filter_by(id = item_id).one()
-	if request.method == 'POST':
-		if request.form['name']:
-			editItem.title = request.form['name']
-		if request.form['description']:
-			editItem.description = request.form['description']
-		if request.form['catagory']:
-		  catagory = session.query(Catagory).filter_by(name = request.form['catagory']).one()
-		  editItem.catagory = catagory
-		session.add(editItem)
-		session.commit()
-		return redirect(url_for('getItems', catagory_id = editItem.catagory_id))
-	else:
-		catagories = session.query(Catagory).all()
-		return render_template('edit.html', catagories=catagories, item = editItem)
+    if 'username' not in login_session:
+        return catalog()
+    editItem = session.query(Item).filter_by(id = item_id).one()
+    if request.method == 'POST':
+        if request.form['name']:
+            editItem.title = request.form['name']
+        if request.form['description']:
+            editItem.description = request.form['description']
+        if request.form['catagory']:
+          catagory = session.query(Catagory).filter_by(name = request.form['catagory']).one()
+          editItem.catagory = catagory
+        session.add(editItem)
+        session.commit()
+        return redirect(url_for('getItems', catagory_id = editItem.catagory_id))
+    else:
+        catagories = session.query(Catagory).all()
+        return render_template('edit.html', catagories=catagories, item = editItem)
 
 #conflict between url and varible
 @app.route("/catalog/<int:catagory_id>/<int:item_id>/delete", methods = ['GET', 'POST'])
@@ -231,32 +235,32 @@ def deleteItem(catagory_id, item_id):
     Display page to delete an item from database.
     redirrected to home page if user is not logged in.
     """
-	item = session.query(Item).filter_by(id = item_id).one()
-	if request.method == 'POST':
-		session.delete(item)
-		session.commit()
-		return redirect(url_for('getItems', catagory_id = item.catagory_id))
-	else:
-		return render_template('delete.html', item = item)
+    if 'username' not in login_session:
+        return catalog()
+    item = session.query(Item).filter_by(id = item_id).one()
+    if request.method == 'POST':
+        session.delete(item)
+        session.commit()
+        return redirect(url_for('getItems', catagory_id = item.catagory_id))
+    else:
+        return render_template('delete.html', item = item)
 
 @app.route('/catalog.json')
 def catalogJSON():
     """
     Serialize database into a JSON object
     """
-	json = { "Catagory" : [] }
-	catagories = session.query(Catagory).all()
-	for catagory in catagories:
-		catdict = catagory.serialize
-		items = session.query(Item).filter_by(catagory_id = catagory.id).all()
-		if items:
-			catdict['Item'] = []
-			for item in items:
-				catdict['Item'].append(item.serialize)
-		json['Catagory'].append(catdict)
-
-
-   	return jsonify(json)
+    json = { "Catagory" : [] }
+    catagories = session.query(Catagory).all()
+    for catagory in catagories:
+        catdict = catagory.serialize
+        items = session.query(Item).filter_by(catagory_id = catagory.id).all()
+        if items:
+            catdict['Item'] = []
+            for item in items:
+                catdict['Item'].append(item.serialize)
+        json['Catagory'].append(catdict)
+    return jsonify(json)
 
 
 
