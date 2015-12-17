@@ -24,6 +24,9 @@ session = DBSession()
 @app.route("/")
 @app.route("/catalog/")
 def catalog():
+    """
+    Show user catalog page of website with most recent items showing
+    """
     catagories = session.query(Catagory).all()
     items = session.query(Item).order_by(desc(Item.id)).limit(10).all()
     if 'username' not in login_session:
@@ -33,14 +36,11 @@ def catalog():
     else:
         return render_template('main.html', catagories=catagories, items=items)
 
-@app.route("/login")
-def login():
-	state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
-	login_session['state'] = state
-	return render_template('login.html', State = state)
-
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
+    """
+    Validate user using Oauth2 from Google+
+    """
     # Validate state token
     if request.args.get('state') != login_session['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
@@ -123,6 +123,9 @@ def gconnect():
 
 @app.route('/gdisconnect')
 def gdisconnect():
+    """
+    Log user out from Google+ and delete fields on login_session, to remove user access
+    """
     access_token = login_session['access_token']
     print 'In gdisconnect access token is %s', access_token
     print 'User name is: '
@@ -154,6 +157,11 @@ def gdisconnect():
 
 @app.route("/catalog/add", methods = ['GET', 'POST'])
 def addItem():
+    """
+    Take user to add item screen, POST method does not work if all required fields are not filled out.
+    Post request adds new item to the database
+    User redirected to home if not logged in.
+    """
 	if request.method == 'POST' and request.form['name'] and request.form['description'] and request.form['catagory']:
 		catagory = session.query(Catagory).filter_by(name = request.form['catagory']).one()
 		newItem = Item(title = request.form['name'], description = request.form['description'], catagory = catagory)
@@ -166,6 +174,10 @@ def addItem():
 
 @app.route("/catalog/<int:catagory_id>")
 def getItems(catagory_id):
+    """
+    Show user catagory page with right side showing all items in the seclected catagory.
+    Option to add item availible if user is logged in
+    """
     catagories = session.query(Catagory).all()
     items = session.query(Item).filter_by(catagory_id = catagory_id).all()
     catagory = session.query(Catagory).filter_by(id = catagory_id).one()
@@ -178,6 +190,10 @@ def getItems(catagory_id):
 
 @app.route("/catalog/<int:catagory_id>/<int:item_id>/")
 def getItem(catagory_id, item_id):
+    """
+    Take user to an item detail page.
+    Option to edit and delete if user is logged in
+    """
     item = session.query(Item).filter_by(id = item_id).one()
     if 'username' not in login_session:
         state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
@@ -188,6 +204,10 @@ def getItem(catagory_id, item_id):
 
 @app.route("/catalog/<int:catagory_id>/<int:item_id>/edit", methods = ['GET', 'POST'])
 def editItem(catagory_id, item_id):
+    """
+    Display page to edit an item in the database.
+    redirrected to home page if user is not logged in.
+    """
 	editItem = session.query(Item).filter_by(id = item_id).one()
 	if request.method == 'POST':
 		if request.form['name']:
@@ -207,6 +227,10 @@ def editItem(catagory_id, item_id):
 #conflict between url and varible
 @app.route("/catalog/<int:catagory_id>/<int:item_id>/delete", methods = ['GET', 'POST'])
 def deleteItem(catagory_id, item_id):
+    """
+    Display page to delete an item from database.
+    redirrected to home page if user is not logged in.
+    """
 	item = session.query(Item).filter_by(id = item_id).one()
 	if request.method == 'POST':
 		session.delete(item)
@@ -217,6 +241,9 @@ def deleteItem(catagory_id, item_id):
 
 @app.route('/catalog.json')
 def catalogJSON():
+    """
+    Serialize database into a JSON object
+    """
 	json = { "Catagory" : [] }
 	catagories = session.query(Catagory).all()
 	for catagory in catagories:
