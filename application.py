@@ -241,15 +241,15 @@ def deleteItem(catagory_id, item_id):
     Display page to delete an item from database.
     redirrected to home page if user is not logged in.
     """
-    if 'username' not in login_session:
-        return catalog()
+    #if 'username' not in login_session:
+    #    return catalog()
     item = session.query(Item).filter_by(id = item_id).one()
-    if request.method == 'POST':
+    if request.method == 'POST' and request.form['nonce'] == login_session['state']:
         session.delete(item)
         session.commit()
         return redirect(url_for('getItems', catagory_id = item.catagory_id))
     else:
-        return render_template('delete.html', item = item)
+        return render_template('delete.html', item = item, nonce = login_session['state'])
 
 @app.route('/catalog.json')
 def catalogJSON():
