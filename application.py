@@ -24,9 +24,12 @@ session = DBSession()
 @app.route("/")
 @app.route("/catalog/")
 def catalog():
-	catagories = session.query(Catagory).all()
-	items = session.query(Item).order_by(desc(Item.id)).limit(10).all()
-	return render_template('main.html', catagories=catagories, items=items)
+    catagories = session.query(Catagory).all()
+    items = session.query(Item).order_by(desc(Item.id)).limit(10).all()
+    if 'username' not in login_session:
+        return render_template('pub_main.html', catagories=catagories, items=items)
+    else:
+       return render_template('main.html', catagories=catagories, items=items)
 
 @app.route("/login")
 def login():
@@ -161,14 +164,21 @@ def addItem():
 
 @app.route("/catalog/<int:catagory_id>")
 def getItems(catagory_id):
-	catagories = session.query(Catagory).all()
-	items = session.query(Item).filter_by(catagory_id = catagory_id).all()
-	return render_template('main.html', catagories=catagories, items=items)
+    catagories = session.query(Catagory).all()
+    items = session.query(Item).filter_by(catagory_id = catagory_id).all()
+    catagory = session.query(Catagory).filter_by(id = catagory_id).one()
+    if 'username' not in login_session:
+        return render_template('pub_catagory.html', catagories=catagories, items=items, catagory = catagory, length = len(items))
+    else:
+        return render_template('catagory.html', catagories=catagories, items=items, catagory = catagory, length = len(items))
 
 @app.route("/catalog/<int:catagory_id>/<int:item_id>/")
 def getItem(catagory_id, item_id):
-	item = session.query(Item).filter_by(id = item_id).one()
-	return render_template('item.html', item = item)
+    item = session.query(Item).filter_by(id = item_id).one()
+    if 'username' not in login_session:
+        return render_template('pub_item.html', item = item)
+    else:
+       return render_template('item.html', item = item)
 
 @app.route("/catalog/<int:catagory_id>/<int:item_id>/edit", methods = ['GET', 'POST'])
 def editItem(catagory_id, item_id):
