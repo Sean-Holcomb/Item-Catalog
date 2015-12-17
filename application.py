@@ -12,7 +12,7 @@ import json
 from flask import make_response
 import requests
 
-CLIENT_ID = json.loads(open('client_secret.json', 'r').read())['web']['client_id']
+CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())['web']['client_id']
 app = Flask(__name__)
 
 engine = create_engine('sqlite:///itemcatalogs.db')
@@ -27,9 +27,11 @@ def catalog():
     catagories = session.query(Catagory).all()
     items = session.query(Item).order_by(desc(Item.id)).limit(10).all()
     if 'username' not in login_session:
-        return render_template('pub_main.html', catagories=catagories, items=items)
+        state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
+        login_session['state'] = state
+        return render_template('pub_main.html', catagories=catagories, items=items, STATE = state)
     else:
-       return render_template('main.html', catagories=catagories, items=items)
+        return render_template('main.html', catagories=catagories, items=items)
 
 @app.route("/login")
 def login():
@@ -168,7 +170,9 @@ def getItems(catagory_id):
     items = session.query(Item).filter_by(catagory_id = catagory_id).all()
     catagory = session.query(Catagory).filter_by(id = catagory_id).one()
     if 'username' not in login_session:
-        return render_template('pub_catagory.html', catagories=catagories, items=items, catagory = catagory, length = len(items))
+        state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
+        login_session['state'] = state
+        return render_template('pub_catagory.html', catagories=catagories, items=items, catagory = catagory, length = len(items), STATE = state)
     else:
         return render_template('catagory.html', catagories=catagories, items=items, catagory = catagory, length = len(items))
 
@@ -176,9 +180,11 @@ def getItems(catagory_id):
 def getItem(catagory_id, item_id):
     item = session.query(Item).filter_by(id = item_id).one()
     if 'username' not in login_session:
-        return render_template('pub_item.html', item = item)
+        state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
+        login_session['state'] = state
+        return render_template('pub_item.html', item = item, STATE = state)
     else:
-       return render_template('item.html', item = item)
+        return render_template('item.html', item = item)
 
 @app.route("/catalog/<int:catagory_id>/<int:item_id>/edit", methods = ['GET', 'POST'])
 def editItem(catagory_id, item_id):
