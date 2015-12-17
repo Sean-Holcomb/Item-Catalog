@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Catagory, Item
+import xml.etree.ElementTree as ET
 
 from flask import session as login_session
 import random, string
@@ -162,8 +163,9 @@ def addItem():
     Post request adds new item to the database
     User redirected to home if not logged in.
     """
-    if 'username' not in login_session:
-        return catalog()
+
+    #if 'username' not in login_session:
+    #    return catalog()
     if request.method == 'POST' and request.form['name'] and request.form['description'] and request.form['catagory']:
         catagory = session.query(Catagory).filter_by(name = request.form['catagory']).one()
         newItem = Item(title = request.form['name'], description = request.form['description'], catagory = catagory)
@@ -254,7 +256,38 @@ def catalogJSON():
     """
     Serialize database into a JSON object
     """
-    json = { "Catagory" : [] }
+    json = buildDict()
+    return jsonify(json)
+
+@app.route('/catalog.xml')
+def catalogXML():
+    """
+    Put data into xml format
+    """
+    xml = buildDict()
+    root = ET.Element('Catagories')
+    for catagory in xml['Catagory']:
+        cataxml = ET.SubElement(root,'catagory')
+        cataxml.set('name', catagory['name'])
+        cataxml.set('id', str(catagory['id']))
+        for item in catagory['Item']:
+            itemxml = ET.SubElement(cataxml, 'item')
+            idxml = ET.SubElement(itemxml, 'id')
+            cat_idxml = ET.SubElement(itemxml, 'cat_id')
+            titlexml = ET.SubElement(itemxml, 'title')
+            descriptionxml = ET.SubElement(itemxml, 'description')
+            idxml.text = str(item['id'])
+            cat_idxml.text = str(item['cat_id'])
+            titlexml.text = item['title']
+            descriptionxml.text = item['description']
+
+    return app.response_class(ET.dump(root), mimetype='application/xml')
+
+def buildDict():
+    """
+    Return a python dictionary of database for use in API endpoints
+    """
+    dbDict = { "Catagory" : [] }
     catagories = session.query(Catagory).all()
     for catagory in catagories:
         catdict = catagory.serialize
@@ -263,10 +296,8 @@ def catalogJSON():
             catdict['Item'] = []
             for item in items:
                 catdict['Item'].append(item.serialize)
-        json['Catagory'].append(catdict)
-    return jsonify(json)
-
-
+        dbDict['Catagory'].append(catdict)
+    return dbDict
 
 if __name__ == '__main__':
 	app.secret_key = 'super_secret_key'
