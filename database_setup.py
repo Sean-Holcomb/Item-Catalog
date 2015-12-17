@@ -29,6 +29,7 @@ class Item(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String(80), nullable=False)
     description = Column(String, nullable = False)
+    image = Column(String)
     catagory_id = Column(Integer, ForeignKey('catagory.id'))
     catagory = relationship(Catagory)
 
@@ -42,7 +43,7 @@ class Item(Base):
             'id': self.id
         }
 
-engine = create_engine('sqlite:///itemcatalogs.db')
+engine = create_engine('sqlite:///itemscatalog.db')
 
 
 Base.metadata.create_all(engine)

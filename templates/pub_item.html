@@ -51,6 +51,9 @@
 	<body>
 		<div class="content">
 			<h2>{{item.title}}</h2>
+			{% if item.image %}
+				<img src='{{item.image}}'>
+			{% endif %}
 			<p>{{item.description}}</p>
 		</div>
 

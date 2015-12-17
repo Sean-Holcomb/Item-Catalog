@@ -15,7 +15,7 @@ import requests
 CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())['web']['client_id']
 app = Flask(__name__)
 
-engine = create_engine('sqlite:///itemcatalogs.db')
+engine = create_engine('sqlite:///itemscatalog.db')
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
@@ -167,6 +167,8 @@ def addItem():
     if request.method == 'POST' and request.form['name'] and request.form['description'] and request.form['catagory']:
         catagory = session.query(Catagory).filter_by(name = request.form['catagory']).one()
         newItem = Item(title = request.form['name'], description = request.form['description'], catagory = catagory)
+        if request.form['image']:
+            newItem.image = request.form['image']
         session.add(newItem)
         session.commit()
         return redirect(url_for('getItems', catagory_id = catagory.id))
@@ -219,8 +221,10 @@ def editItem(catagory_id, item_id):
         if request.form['description']:
             editItem.description = request.form['description']
         if request.form['catagory']:
-          catagory = session.query(Catagory).filter_by(name = request.form['catagory']).one()
-          editItem.catagory = catagory
+            catagory = session.query(Catagory).filter_by(name = request.form['catagory']).one()
+            editItem.catagory = catagory
+        if request.form['image']:
+            editItem.image = request.form['image']
         session.add(editItem)
         session.commit()
         return redirect(url_for('getItems', catagory_id = editItem.catagory_id))
