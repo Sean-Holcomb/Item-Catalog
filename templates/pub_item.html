@@ -1,7 +1,7 @@
 <html>
 	<head>
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-		<script src="//apis.google.com/js/platform.js?onload=start"> </script>
+		<script src="//apis.google.com/js/platform.js?onload=start"></script>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 		<link href={{ url_for('static', filename='styles.css') }} rel="stylesheet">
 	</head>
@@ -22,12 +22,11 @@
 			<script>
 				function signInCallback(authResult) {
 					if (authResult['code']) {
-						// Hide the sign-in button now that the user is authorized
+					// Hide the sign-in button now that the user is authorized
 						$('#signinButton').attr('style', 'display: none');
 						// Send the one-time-use code to the server, if the server responds, write a 'login successful' message to the web page and then redirect back to the main restaurants page
 						$.ajax({
 							type: 'POST',
-							console.log({{STATE}})
 							url: '/gconnect?state={{STATE}}',
 							processData: false,
 							data: authResult['code'],
@@ -35,7 +34,6 @@
 							success: function(result) {
 							// Handle or verify the server response if necessary.
 								if (result) {
-									console.log("yo")
 									setTimeout(function() {
 									window.location.href = "{{url_for('catalog')}}";
 									}, 4000);
@@ -46,7 +44,6 @@
 				}); } }
 			</script>
 		</div>
-
 	</header>
 	<body>
 		<div class="content">
@@ -56,6 +53,5 @@
 			{% endif %}
 			<p>{{item.description}}</p>
 		</div>
-
 	</body>
 </html>

@@ -108,53 +108,39 @@ def gconnect():
     data = answer.json()
 
     login_session['username'] = data['name']
-    login_session['picture'] = data['picture']
-    login_session['email'] = data['email']
 
-    output = ''
-    output += '<h1>Welcome, '
-    output += login_session['username']
-    output += '!</h1>'
-    output += '<img src="'
-    output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
-    flash("you are now logged in as %s" % login_session['username'])
-    print "done!"
-    return output
+    return catalog()
 
 @app.route('/gdisconnect')
 def gdisconnect():
     """
     Log user out from Google+ and delete fields on login_session, to remove user access
     """
-    access_token = login_session['access_token']
+    access_token = login_session['credentials'].access_token
     print 'In gdisconnect access token is %s', access_token
     print 'User name is: '
     print login_session['username']
     if access_token is None:
- 	print 'Access Token is None'
-    	response = make_response(json.dumps('Current user not connected.'), 401)
-    	response.headers['Content-Type'] = 'application/json'
-    	return response
-    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
+        print 'Access Token is None'
+        response = make_response(json.dumps('Current user not connected.'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
     print 'result is '
     print result
     if result['status'] == '200':
-	del login_session['access_token']
-    	del login_session['gplus_id']
-    	del login_session['username']
-    	del login_session['email']
-    	del login_session['picture']
-    	response = make_response(json.dumps('Successfully disconnected.'), 200)
-    	response.headers['Content-Type'] = 'application/json'
-    	return response
+        del login_session['credentials']
+        del login_session['gplus_id']
+        del login_session['username']
+        response = make_response(json.dumps('Successfully disconnected.'), 200)
+        response.headers['Content-Type'] = 'application/json'
+        return catalog()
     else:
-
-    	response = make_response(json.dumps('Failed to revoke token for given user.', 400))
-    	response.headers['Content-Type'] = 'application/json'
-    	return response
+        response = make_response(json.dumps('Failed to revoke token for given user.', 400))
+        response.headers['Content-Type'] = 'application/json'
+        return catalog()
 
 @app.route("/catalog/add", methods = ['GET', 'POST'])
 def addItem():
@@ -164,8 +150,8 @@ def addItem():
     User redirected to home if not logged in.
     """
 
-    #if 'username' not in login_session:
-    #    return catalog()
+    if 'username' not in login_session:
+        return catalog()
     if request.method == 'POST' and request.form['name'] and request.form['description'] and request.form['catagory']:
         catagory = session.query(Catagory).filter_by(name = request.form['catagory']).one()
         newItem = Item(title = request.form['name'], description = request.form['description'], catagory = catagory)
@@ -241,8 +227,8 @@ def deleteItem(catagory_id, item_id):
     Display page to delete an item from database.
     redirrected to home page if user is not logged in.
     """
-    #if 'username' not in login_session:
-    #    return catalog()
+    if 'username' not in login_session:
+        return catalog()
     item = session.query(Item).filter_by(id = item_id).one()
     if request.method == 'POST' and request.form['nonce'] == login_session['state']:
         session.delete(item)
