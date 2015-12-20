@@ -31,11 +31,17 @@ def catalog():
     catagories = session.query(Catagory).all()
     items = session.query(Item).order_by(desc(Item.id)).limit(10).all()
     if 'username' not in login_session:
-        state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
+        state = ''.join(random.choice(string.ascii_uppercase + string.digits)\
+            for x in xrange(32))
         login_session['state'] = state
-        return render_template('pub_main.html', catagories=catagories, items=items, STATE = state)
+        return render_template('pub_main.html',
+            catagories=catagories,
+            items=items,
+            STATE = state)
     else:
-        return render_template('main.html', catagories=catagories, items=items)
+        return render_template('main.html',
+            catagories=catagories,
+            items=items)
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
@@ -145,16 +151,20 @@ def gdisconnect():
 @app.route("/catalog/add", methods = ['GET', 'POST'])
 def addItem():
     """
-    Take user to add item screen, POST method does not work if all required fields are not filled out.
+    Take user to add item screen, POST method does not work if all required
+     fields are not filled out.
     Post request adds new item to the database
     User redirected to home if not logged in.
     """
 
     if 'username' not in login_session:
         return catalog()
-    if request.method == 'POST' and request.form['name'] and request.form['description'] and request.form['catagory']:
+    if request.method == 'POST' and request.form['name'] and \
+    request.form['description'] and request.form['catagory']:
         catagory = session.query(Catagory).filter_by(name = request.form['catagory']).one()
-        newItem = Item(title = request.form['name'], description = request.form['description'], catagory = catagory)
+        newItem = Item(title = request.form['name'],
+            description = request.form['description'],
+            catagory = catagory)
         if request.form['image']:
             newItem.image = request.form['image']
         session.add(newItem)
@@ -167,18 +177,29 @@ def addItem():
 @app.route("/catalog/<int:catagory_id>")
 def getItems(catagory_id):
     """
-    Show user catagory page with right side showing all items in the seclected catagory.
+    Show user catagory page with right side
+    showing all items in the seclected catagory.
     Option to add item availible if user is logged in
     """
     catagories = session.query(Catagory).all()
     items = session.query(Item).filter_by(catagory_id = catagory_id).all()
     catagory = session.query(Catagory).filter_by(id = catagory_id).one()
     if 'username' not in login_session:
-        state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
+        state = ''.join(random.choice(string.ascii_uppercase + string.digits) \
+            for x in xrange(32))
         login_session['state'] = state
-        return render_template('pub_catagory.html', catagories=catagories, items=items, catagory = catagory, length = len(items), STATE = state)
+        return render_template('pub_catagory.html',
+            catagories=catagories,
+            items=items,
+            catagory = catagory,
+            length = len(items),
+            STATE = state)
     else:
-        return render_template('catagory.html', catagories=catagories, items=items, catagory = catagory, length = len(items))
+        return render_template('catagory.html',
+            catagories=catagories,
+            items=items,
+            catagory = catagory,
+            length = len(items))
 
 @app.route("/catalog/<int:catagory_id>/<int:item_id>/")
 def getItem(catagory_id, item_id):
@@ -188,7 +209,8 @@ def getItem(catagory_id, item_id):
     """
     item = session.query(Item).filter_by(id = item_id).one()
     if 'username' not in login_session:
-        state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
+        state = ''.join(random.choice(string.ascii_uppercase + string.digits) \
+            for x in xrange(32))
         login_session['state'] = state
         return render_template('pub_item.html', item = item, STATE = state)
     else:
