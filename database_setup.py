@@ -28,16 +28,16 @@ class Item(Base):
 
     id = Column(Integer, primary_key=True)
     title = Column(String(80), nullable=False)
-    description = Column(String, nullable = False)
+    description = Column(String, nullable=False)
     image = Column(String)
     catagory_id = Column(Integer, ForeignKey('catagory.id'))
-    catagory = relationship(Catagory, single_parent=True ,cascade="all, delete-orphan")
+    catagory = relationship(Catagory)
 
     @property
     def serialize(self):
 
         return {
-        	'cat_id' : self.catagory_id,
+            'cat_id': self.catagory_id,
             'description': self.description,
             'title': self.title,
             'id': self.id

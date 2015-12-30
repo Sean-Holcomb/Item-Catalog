@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template
+from flask import request, redirect, url_for, flash, jsonify
 from flask.ext.seasurf import SeaSurf
 from dict2xml import dict2xml as xmlify
 from sqlalchemy import create_engine, desc
@@ -7,7 +8,8 @@ from database_setup import Base, Catagory, Item
 import xml.etree.ElementTree as ET
 
 from flask import session as login_session
-import random, string
+import random
+import string
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 import httplib2
@@ -15,7 +17,8 @@ import json
 from flask import make_response
 import requests
 
-CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())['web']['client_id']
+CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())[
+    'web']['client_id']
 app = Flask(__name__)
 csrf = SeaSurf(app)
 
@@ -24,6 +27,7 @@ Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
+
 
 @app.route("/")
 @app.route("/catalog/")
@@ -34,17 +38,18 @@ def catalog():
     catagories = session.query(Catagory).all()
     items = session.query(Item).order_by(desc(Item.id)).limit(10).all()
     if 'username' not in login_session:
-        state = ''.join(random.choice(string.ascii_uppercase + string.digits)\
-            for x in xrange(32))
+        state = ''.join(random.choice(string.ascii_uppercase + string.digits)
+                        for x in xrange(32))
         login_session['state'] = state
         return render_template('pub_main.html',
-            catagories=catagories,
-            items=items,
-            STATE = state)
+                               catagories=catagories,
+                               items=items,
+                               STATE=state)
     else:
         return render_template('main.html',
-            catagories=catagories,
-            items=items)
+                               catagories=catagories,
+                               items=items)
+
 
 @csrf.exempt
 @app.route('/gconnect', methods=['POST'])
@@ -101,8 +106,8 @@ def gconnect():
     stored_credentials = login_session.get('credentials')
     stored_gplus_id = login_session.get('gplus_id')
     if stored_credentials is not None and gplus_id == stored_gplus_id:
-        response = make_response(json.dumps('Current user is already connected.'),
-                                 200)
+        response = make_response(
+            json.dumps('Current user is already connected.'), 200)
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -121,11 +126,13 @@ def gconnect():
 
     return catalog()
 
+
 @csrf.exempt
 @app.route('/gdisconnect')
 def gdisconnect():
     """
-    Log user out from Google+ and delete fields on login_session, to remove user access
+    Log user out from Google+ and delete fields on login_session,
+    to remove user access
     """
     access_token = login_session['credentials']
     print 'In gdisconnect access token is %s', access_token
@@ -133,7 +140,8 @@ def gdisconnect():
     print login_session['username']
     if access_token is None:
         print 'Access Token is None'
-        response = make_response(json.dumps('Current user not connected.'), 401)
+        response = make_response(
+            json.dumps('Current user not connected.'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
     url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
@@ -149,11 +157,15 @@ def gdisconnect():
         response.headers['Content-Type'] = 'application/json'
         return catalog()
     else:
-        response = make_response(json.dumps('Failed to revoke token for given user.', 400))
+        response = make_response(
+            json.dumps(
+                'Failed to revoke token for given user.',
+                400))
         response.headers['Content-Type'] = 'application/json'
         return catalog()
 
-@app.route("/catalog/add", methods = ['GET', 'POST'])
+
+@app.route("/catalog/add", methods=['GET', 'POST'])
 def addItem():
     """
     Take user to add item screen, POST method does not work if all required
@@ -165,19 +177,21 @@ def addItem():
     if 'username' not in login_session:
         return catalog()
     if request.method == 'POST' and request.form['name'] and \
-    request.form['description'] and request.form['catagory']:
-        catagory = session.query(Catagory).filter_by(name = request.form['catagory']).one()
-        newItem = Item(title = request.form['name'],
-            description = request.form['description'],
-            catagory = catagory)
+            request.form['description'] and request.form['catagory']:
+        catagory = session.query(Catagory).filter_by(
+            name=request.form['catagory']).one()
+        newItem = Item(title=request.form['name'],
+                       description=request.form['description'],
+                       catagory=catagory)
         if request.form['image']:
             newItem.image = request.form['image']
         session.add(newItem)
         session.commit()
-        return redirect(url_for('getItems', catagory_id = catagory.id))
+        return redirect(url_for('getItems', catagory_id=catagory.id))
     else:
         catagories = session.query(Catagory).all()
         return render_template('new.html', catagories=catagories)
+
 
 @app.route("/catalog/<int:catagory_id>")
 def getItems(catagory_id):
@@ -187,24 +201,25 @@ def getItems(catagory_id):
     Option to add item availible if user is logged in
     """
     catagories = session.query(Catagory).all()
-    items = session.query(Item).filter_by(catagory_id = catagory_id).all()
-    catagory = session.query(Catagory).filter_by(id = catagory_id).one()
+    items = session.query(Item).filter_by(catagory_id=catagory_id).all()
+    catagory = session.query(Catagory).filter_by(id=catagory_id).one()
     if 'username' not in login_session:
-        state = ''.join(random.choice(string.ascii_uppercase + string.digits) \
-            for x in xrange(32))
+        state = ''.join(random.choice(string.ascii_uppercase + string.digits)
+                        for x in xrange(32))
         login_session['state'] = state
         return render_template('pub_catagory.html',
-            catagories=catagories,
-            items=items,
-            catagory = catagory,
-            length = len(items),
-            STATE = state)
+                               catagories=catagories,
+                               items=items,
+                               catagory=catagory,
+                               length=len(items),
+                               STATE=state)
     else:
         return render_template('catagory.html',
-            catagories=catagories,
-            items=items,
-            catagory = catagory,
-            length = len(items))
+                               catagories=catagories,
+                               items=items,
+                               catagory=catagory,
+                               length=len(items))
+
 
 @app.route("/catalog/<int:catagory_id>/<int:item_id>/")
 def getItem(catagory_id, item_id):
@@ -212,16 +227,21 @@ def getItem(catagory_id, item_id):
     Take user to an item detail page.
     Option to edit and delete if user is logged in
     """
-    item = session.query(Item).filter_by(id = item_id).one()
+    item = session.query(Item).filter_by(id=item_id).one()
     if 'username' not in login_session:
-        state = ''.join(random.choice(string.ascii_uppercase + string.digits) \
-            for x in xrange(32))
+        state = ''.join(random.choice(string.ascii_uppercase + string.digits)
+                        for x in xrange(32))
         login_session['state'] = state
-        return render_template('pub_item.html', item = item, STATE = state)
+        return render_template('pub_item.html', item=item, STATE=state)
     else:
-        return render_template('item.html', item = item)
+        return render_template('item.html', item=item)
 
-@app.route("/catalog/<int:catagory_id>/<int:item_id>/edit", methods = ['GET', 'POST'])
+
+@app.route(
+    "/catalog/<int:catagory_id>/<int:item_id>/edit",
+    methods=[
+        'GET',
+        'POST'])
 def editItem(catagory_id, item_id):
     """
     Display page to edit an item in the database.
@@ -229,26 +249,36 @@ def editItem(catagory_id, item_id):
     """
     if 'username' not in login_session:
         return catalog()
-    editItem = session.query(Item).filter_by(id = item_id).one()
+    editItem = session.query(Item).filter_by(id=item_id).one()
     if request.method == 'POST':
         if request.form['name']:
             editItem.title = request.form['name']
         if request.form['description']:
             editItem.description = request.form['description']
         if request.form['catagory']:
-            catagory = session.query(Catagory).filter_by(name = request.form['catagory']).one()
+            catagory = session.query(Catagory).filter_by(
+                name=request.form['catagory']).one()
             editItem.catagory = catagory
         if request.form['image']:
             editItem.image = request.form['image']
         session.add(editItem)
         session.commit()
-        return redirect(url_for('getItems', catagory_id = editItem.catagory_id))
+        return redirect(url_for('getItems', catagory_id=editItem.catagory_id))
     else:
         catagories = session.query(Catagory).all()
-        return render_template('edit.html', catagories=catagories, item = editItem)
+        return render_template(
+            'edit.html',
+            catagories=catagories,
+            item=editItem)
 
-#conflict between url and varible
-@app.route("/catalog/<int:catagory_id>/<int:item_id>/delete", methods = ['GET', 'POST'])
+# conflict between url and varible
+
+
+@app.route(
+    "/catalog/<int:catagory_id>/<int:item_id>/delete",
+    methods=[
+        'GET',
+        'POST'])
 def deleteItem(catagory_id, item_id):
     """
     Display page to delete an item from database.
@@ -256,13 +286,17 @@ def deleteItem(catagory_id, item_id):
     """
     if 'username' not in login_session:
         return catalog()
-    item = session.query(Item).filter_by(id = item_id).one()
+    item = session.query(Item).filter_by(id=item_id).one()
     if request.method == 'POST':
         session.delete(item)
         session.commit()
-        return redirect(url_for('getItems', catagory_id = item.catagory_id))
+        return redirect(url_for('getItems', catagory_id=item.catagory_id))
     else:
-        return render_template('delete.html', item = item, nonce = login_session['state'])
+        return render_template(
+            'delete.html',
+            item=item,
+            nonce=login_session['state'])
+
 
 @app.route('/catalog.json')
 def catalogJSON():
@@ -272,6 +306,7 @@ def catalogJSON():
     json = buildDict()
     return jsonify(json)
 
+
 @app.route('/catalog.xml')
 def catalogXML():
     """
@@ -280,15 +315,16 @@ def catalogXML():
     data = buildDict()
     return xmlify(data, wrap="all", indent="  ")
 
+
 def buildDict():
     """
     Return a python dictionary of database for use in API endpoints
     """
-    dbDict = { "Catagory" : [] }
+    dbDict = {"Catagory": []}
     catagories = session.query(Catagory).all()
     for catagory in catagories:
         catdict = catagory.serialize
-        items = session.query(Item).filter_by(catagory_id = catagory.id).all()
+        items = session.query(Item).filter_by(catagory_id=catagory.id).all()
         if items:
             catdict['Item'] = []
             for item in items:
@@ -297,6 +333,6 @@ def buildDict():
     return dbDict
 
 if __name__ == '__main__':
-	app.secret_key = 'super_secret_key'
-	app.debug = True
-	app.run(host='0.0.0.0', port=8000)
+    app.secret_key = 'super_secret_key'
+    app.debug = True
+    app.run(host='0.0.0.0', port=8000)
