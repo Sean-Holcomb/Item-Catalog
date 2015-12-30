@@ -10,6 +10,10 @@ This is a web app built using Flask. It keeps track of items that fit into diffe
 
 	vagrant ssh
 
+	sudo pip install flask-seasurf
+
+	sudo pip install dict2xml
+
 	cd /vagrant/catalog
 
 	python database_setup.py

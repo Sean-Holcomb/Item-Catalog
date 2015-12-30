@@ -31,7 +31,7 @@ class Item(Base):
     description = Column(String, nullable = False)
     image = Column(String)
     catagory_id = Column(Integer, ForeignKey('catagory.id'))
-    catagory = relationship(Catagory)
+    catagory = relationship(Catagory, single_parent=True ,cascade="all, delete-orphan")
 
     @property
     def serialize(self):

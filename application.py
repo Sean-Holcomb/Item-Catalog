@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask.ext.seasurf import SeaSurf
+from dict2xml import dict2xml as xmlify
 from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Catagory, Item
@@ -15,6 +17,7 @@ import requests
 
 CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())['web']['client_id']
 app = Flask(__name__)
+csrf = SeaSurf(app)
 
 engine = create_engine('sqlite:///itemscatalog.db')
 Base.metadata.bind = engine
@@ -43,6 +46,7 @@ def catalog():
             catagories=catagories,
             items=items)
 
+@csrf.exempt
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
     """
@@ -103,7 +107,7 @@ def gconnect():
         return response
 
     # Store the access token in the session for later use.
-    login_session['credentials'] = credentials
+    login_session['credentials'] = credentials.access_token
     login_session['gplus_id'] = gplus_id
 
     # Get user info
@@ -117,12 +121,13 @@ def gconnect():
 
     return catalog()
 
+@csrf.exempt
 @app.route('/gdisconnect')
 def gdisconnect():
     """
     Log user out from Google+ and delete fields on login_session, to remove user access
     """
-    access_token = login_session['credentials'].access_token
+    access_token = login_session['credentials']
     print 'In gdisconnect access token is %s', access_token
     print 'User name is: '
     print login_session['username']
@@ -252,7 +257,7 @@ def deleteItem(catagory_id, item_id):
     if 'username' not in login_session:
         return catalog()
     item = session.query(Item).filter_by(id = item_id).one()
-    if request.method == 'POST' and request.form['nonce'] == login_session['state']:
+    if request.method == 'POST':
         session.delete(item)
         session.commit()
         return redirect(url_for('getItems', catagory_id = item.catagory_id))
@@ -272,24 +277,8 @@ def catalogXML():
     """
     Put data into xml format
     """
-    xml = buildDict()
-    root = ET.Element('Catagories')
-    for catagory in xml['Catagory']:
-        cataxml = ET.SubElement(root,'catagory')
-        cataxml.set('name', catagory['name'])
-        cataxml.set('id', str(catagory['id']))
-        for item in catagory['Item']:
-            itemxml = ET.SubElement(cataxml, 'item')
-            idxml = ET.SubElement(itemxml, 'id')
-            cat_idxml = ET.SubElement(itemxml, 'cat_id')
-            titlexml = ET.SubElement(itemxml, 'title')
-            descriptionxml = ET.SubElement(itemxml, 'description')
-            idxml.text = str(item['id'])
-            cat_idxml.text = str(item['cat_id'])
-            titlexml.text = item['title']
-            descriptionxml.text = item['description']
-
-    return app.response_class(ET.dump(root), mimetype='application/xml')
+    data = buildDict()
+    return xmlify(data, wrap="all", indent="  ")
 
 def buildDict():
     """
